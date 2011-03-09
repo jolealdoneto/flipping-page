@@ -42,7 +42,7 @@
 					
 					//alert(pos.left);
 					
-					var startBRight = $('<button class="start">').css({ left: (pos.left + dim.width * 2- 30)+'px', top: (pos.top) + 'px' }).bind("mousedown", function(e) {
+					var startBRight = $('<button class="start">').css({ left: (pos.left + dim.width * 2- 30)+'px', top: (pos.top) + 'px' , 'background-color': 'blue'}).bind("mousedown", function(e) {
 						okRight = true;
 						if (e.preventDefault)
 							e.preventDefault();
@@ -51,7 +51,7 @@
 						return false;
 					});
 					
-					var startBLeft = $('<button class="start">').css({ left: (pos.left)+'px', top: (pos.top) + 'px'}).bind("mousedown", function(e) {
+					var startBLeft = $('<button class="start">').css({ left: (pos.left)+'px', top: (pos.top) + 'px' , 'background-color': 'blue'}).bind("mousedown", function(e) {
 						okLeft = true;
 						if (e.preventDefault)
 							e.preventDefault();
@@ -89,7 +89,7 @@
 					c2d.lineTo(0, 0);
 				c2d.closePath();
 				c2d.clip();*/
-				c2d.drawImage(image, 0, 0);
+				//c2d.drawImage(image, 0, 0);
 				c2d.drawImage(image, image.width, 0);
 
 				c2d.save();	
@@ -104,14 +104,8 @@
 				var pos = $(canvas).offset();
 				
 				var x = (mouseX == 0 ? 1 : Math.abs(mouseX)), y = mouseY;
-
 				
 				var angle = ((y)/x * -90);
-				
-				if (Math.abs(angle) > 130) {
-					angle = -130;
-				}	
-				
 				var clipWidth = y / Math.sin((-1*angle) * Math.PI/180);
 				var clipHeight = x / Math.cos((90 + angle) * Math.PI/180);
 				var pageWidth = x/ Math.cos((-1*angle) * Math.PI/180);
@@ -135,9 +129,9 @@
 				}*/
 				c2d.save();			
 					c2d.save();
-						c2d.translate(mouseX, mouseY);
+						c2d.translate(image.width, 0);
 						c2d.rotate(-angle * Math.PI / 180);
-						c2d.translate(-image.width, 0);
+						c2d.translate(-image.width-preimg, 0);
 
 						c2d.beginPath();
 							c2d.moveTo(preimg, 0);
@@ -152,34 +146,29 @@
 				c2d.restore();
 					
 					//c2d.stroke();
-				
+					/*
 				c2d.save();
 					c2d.beginPath();
 						c2d.moveTo(0,0);
 						c2d.lineTo(0, image.height);
-						c2d.lineTo(image.width, image.height);
-						c2d.lineTo(image.width, 0);
+						c2d.lineTo(image.width * 2, image.height);
+						c2d.lineTo(image.width * 2, 0);
 						c2d.closePath();
 						c2d.clip();
 					c2d.beginPath();
-						c2d.moveTo(mouseX - beta, 0);
-						c2d.lineTo(0 , 0);
-						c2d.lineTo(0, y + sigma);
-						c2d.lineTo(mouseX - beta,0);
+						c2d.moveTo(mouseX + beta, 0);
+						c2d.lineTo(image.width * 2,0);
+						c2d.lineTo(image.width * 2, y + sigma);
+						c2d.lineTo(mouseX + beta,0);
 					c2d.closePath();
 					c2d.fill();
-				c2d.restore();
+				c2d.restore();*/
 			}
 			
 			function drawClipRight(c2d, mouseX, mouseY) {
 				var x = (mouseX == 0 ? 1 : Math.abs(mouseX - image.width * 2)), y = mouseY;
 				
 				var angle = ((y)/x * -90);
-					
-				if (Math.abs(angle) > 130) {
-					angle = -130;
-				}	
-				
 				var clipWidth = y / Math.sin((-1*angle) * Math.PI/180);
 				var clipHeight = x / Math.cos((90 + angle) * Math.PI/180);
 				var pageWidth = x/ Math.cos((-1*angle) * Math.PI/180);
@@ -196,6 +185,10 @@
 				
 				
 				//var howLong = x / Math.sin((90 - (angle*-1)) * Math.PI/180);
+					
+				if (Math.abs(angle) > 130) {
+					angle = -130;
+				}
 				c2d.save();			
 					c2d.save();
 						c2d.translate(mouseX,mouseY);
