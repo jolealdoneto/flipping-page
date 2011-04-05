@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 	<head>
-		<title>JavaScript Platformer 1</title>
+		<title>Flipping-page, José Leal Domingues Neto</title>
 		<script type="text/javascript" src="/public/jquery.js"></script>
 		<link href="/public/style.css" rel="Stylesheet" />
 	</head>
@@ -42,7 +42,7 @@
 					
 					//alert(pos.left);
 					
-					var startBRight = $('<button class="start">').css({ left: (pos.left + dim.width * 2- 30)+'px', top: (pos.top) + 'px' , 'background-color': 'blue'}).bind("mousedown", function(e) {
+					var startBRight = $('<button class="start">').css({ left: (pos.left + dim.width * 2- 30)+'px', top: (pos.top) + 'px' }).bind("mousedown", function(e) {
 						okRight = true;
 						if (e.preventDefault)
 							e.preventDefault();
@@ -51,7 +51,7 @@
 						return false;
 					});
 					
-					var startBLeft = $('<button class="start">').css({ left: (pos.left)+'px', top: (pos.top) + 'px' , 'background-color': 'blue'}).bind("mousedown", function(e) {
+					var startBLeft = $('<button class="start">').css({ left: (pos.left)+'px', top: (pos.top) + 'px'}).bind("mousedown", function(e) {
 						okLeft = true;
 						if (e.preventDefault)
 							e.preventDefault();
@@ -89,7 +89,7 @@
 					c2d.lineTo(0, 0);
 				c2d.closePath();
 				c2d.clip();*/
-				//c2d.drawImage(image, 0, 0);
+				c2d.drawImage(image, 0, 0);
 				c2d.drawImage(image, image.width, 0);
 
 				c2d.save();	
@@ -104,8 +104,21 @@
 				var pos = $(canvas).offset();
 				
 				var x = (mouseX == 0 ? 1 : Math.abs(mouseX)), y = mouseY;
+
 				
-				var angle = ((y)/x * -90);
+				//var angle = ((y)/x * -90);
+				
+				// distance = root((x2 - x1)^2 + (y2 - y1)^2) / 2, since I want the middle of the thing.
+                                var distanciaMeio = Math.sqrt(x*x + y*y) / 2;
+                                var myBeta = Math.acos(x / 2 / distanciaMeio);
+                                var myTheta = 90 - myBeta;
+                                var myHeight = y / 2 / Math.sin(myTheta * Math.PI/180);
+
+                                // Y = root(2dis^2)
+                                var myY = Math.sqrt(myHeight * myHeight + distanciaMeio * distanciaMeio);
+				// Now the angle is easy =´p
+                                var angle = -Math.asin(y / myY) * 180 / Math.PI;
+				
 				var clipWidth = y / Math.sin((-1*angle) * Math.PI/180);
 				var clipHeight = x / Math.cos((90 + angle) * Math.PI/180);
 				var pageWidth = x/ Math.cos((-1*angle) * Math.PI/180);
@@ -129,9 +142,9 @@
 				}*/
 				c2d.save();			
 					c2d.save();
-						c2d.translate(image.width, 0);
+						c2d.translate(mouseX, mouseY);
 						c2d.rotate(-angle * Math.PI / 180);
-						c2d.translate(-image.width-preimg, 0);
+						c2d.translate(-image.width, 0);
 
 						c2d.beginPath();
 							c2d.moveTo(preimg, 0);
@@ -146,29 +159,42 @@
 				c2d.restore();
 					
 					//c2d.stroke();
-					/*
+				
 				c2d.save();
+					
 					c2d.beginPath();
-						c2d.moveTo(0,0);
-						c2d.lineTo(0, image.height);
-						c2d.lineTo(image.width * 2, image.height);
-						c2d.lineTo(image.width * 2, 0);
-						c2d.closePath();
-						c2d.clip();
-					c2d.beginPath();
-						c2d.moveTo(mouseX + beta, 0);
-						c2d.lineTo(image.width * 2,0);
-						c2d.lineTo(image.width * 2, y + sigma);
-						c2d.lineTo(mouseX + beta,0);
+						c2d.moveTo(mouseX - beta, 0);
+						c2d.lineTo(0 , 0);
+						c2d.lineTo(0, y + sigma);
+						c2d.lineTo(mouseX - beta,0);
 					c2d.closePath();
 					c2d.fill();
-				c2d.restore();*/
+				c2d.restore();
 			}
 			
 			function drawClipRight(c2d, mouseX, mouseY) {
 				var x = (mouseX == 0 ? 1 : Math.abs(mouseX - image.width * 2)), y = mouseY;
+
+                                // distance = root((x2 - x1)^2 + (y2 - y1)^2) / 2, since I want the middle of the thing.
+                                var distanciaMeio = Math.sqrt(x*x + y*y) / 2;
+                                var myBeta = Math.acos(x / 2 / distanciaMeio);
+                                var myTheta = 90 - myBeta;
+                                var myHeight = y / 2 / Math.sin(myTheta * Math.PI/180);
+
+                                // Y = root(2dis^2)
+                                var myY = Math.sqrt(myHeight * myHeight + distanciaMeio * distanciaMeio);
+				// Now the angle is easy =´p
+                                // first I see if it is ok..
+                                var easy = y / myY;
+                                var plus90 = false;
+                                if (easy > 1) {
+                                    easy = 1 - (easy - 1);
+                                    plus90 = true;
+                                }
+
+                                var angle = -Math.asin(easy) * 180 / Math.PI;
+                                
 				
-				var angle = ((y)/x * -90);
 				var clipWidth = y / Math.sin((-1*angle) * Math.PI/180);
 				var clipHeight = x / Math.cos((90 + angle) * Math.PI/180);
 				var pageWidth = x/ Math.cos((-1*angle) * Math.PI/180);
@@ -181,14 +207,10 @@
 				var sigma = clipHeight * Math.sin((90 + angle) * Math.PI/180);				
 				var beta = Math.tan((90 + angle) * Math.PI/180) * y;
 				
-				$("#log").html("x: " + x + " y: " + y + " angle: " + angle + " clipWith: " + (clipWidth) + " clipHeight: " + clipHeight);
+				$("#log").html("asin: " + easy +  "x: " + x + " y: " + y + " angle: " + angle + " clipWith: " + (clipWidth) + " clipHeight: " + clipHeight);
 				
 				
 				//var howLong = x / Math.sin((90 - (angle*-1)) * Math.PI/180);
-					
-				if (Math.abs(angle) > 130) {
-					angle = -130;
-				}
 				c2d.save();			
 					c2d.save();
 						c2d.translate(mouseX,mouseY);
