@@ -1,3 +1,11 @@
 html, div, p, body { padding: 0px; margin: 0px; }
 
 button.start { width: 30px; height: 30px; background-color: transparent; color: transparent; border: 0px; padding: 0px; position: absolute; top: 0px; left: 0px; z-index: 100; }   
+
+div.panel { border-radius: 15px; border: solid 1px #1842c9; background-color: #a0b6ff; margin: 3px auto; width: 300px; height: 20px; position: relative; top: 0px; left: 0px; -moz-box-shadow: 10px 10px 5px #888;
+-webkit-box-shadow: 10px 10px 5px #888;
+box-shadow: 10px 10px 5px #888; }
+    div.panel button.back { width: 15px; height: 15px; background-image: url('back-i.png'); cursor: pointer; position: absolute; top: 3px; left: 5px; border: 0px; background-color: transparent; }
+    div.panel button.fwrd { width: 15px; height: 15px; background-image: url('fwrd-i.png'); cursor: pointer; position: absolute; top: 3px; right: 5px; border: 0px; background-color: transparent; }
+    div.panel input.current { font-family: verdana; font-size: 11px; font-weight:bold; background-color: #a0b6ff; border: 0px; position: absolute; top: 0px; left: 25px; width: 20px; text-align: right;}
+    div.panel span.maxN { font-family: verdana; font-size: 11px; font-weight: bold; position: absolute; top: 3px; left: 49px; }

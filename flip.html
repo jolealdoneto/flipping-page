@@ -3,265 +3,91 @@
 	<head>
 		<title>Flipping-page, José Leal Domingues Neto</title>
 		<script type="text/javascript" src="/public/jquery.js"></script>
+                <script type="text/javascript" src="/public/flipPage.js"></script>
 		<link href="/public/style.css" rel="Stylesheet" />
 	</head>
 	<body>
 		<canvas id="canvas" width="638px" height="818px">
 			<p>Your browser does not support the canvas element.</p>
 		</canvas>
-		<span id="log"></span>
-		
+                <div class="panel">
+                    <button class="back"></button>
+                    <button class="fwrd"></button>
+                    <input type="text" class="current" />
+                    <span class="maxN"></span>
+                </div>
 		
 		<script type="text/javascript">
 			var canvas = null;
-			var c2d = null;
-			var image = new Image();
-			image.src = "/public/magazine.jpg";
+			//var c2d = null;
 			
-			$(document).ready(function() {	 $(image).load(function() {
-				var dim = {
-					width: image.width,
-					height: image.height
-				}
-				
-				//alert("w" + dim.width + " h " + dim.height);
-				
-				
-				// Set canvas to double size of image
-				canvas = $("#canvas").width(dim.width * 2).height(dim.height * 2).get(0);
-				c2d = canvas.getContext('2d');
-				
-				// set canvas to the middle of the screen
-				$(canvas).css( { 'background-color': 'red', 'position': 'absolute', 'top': ($(document).height() / 2 - $(canvas).height() / 2) + 'px', 'left': ($(document).width() / 2 - $(canvas).width() / 2) + 'px' } )
-				
-				
-				var okLeft = false;
-				var okRight = false;
-				
-					var pos = $(canvas).position();
-					
-					//alert(pos.left);
-					
-					var startBRight = $('<button class="start">').css({ left: (pos.left + dim.width * 2- 30)+'px', top: (pos.top) + 'px' }).bind("mousedown", function(e) {
-						okRight = true;
-						if (e.preventDefault)
-							e.preventDefault();
-						
-						$("#canvas").trigger("mousemove");
-						return false;
-					});
-					
-					var startBLeft = $('<button class="start">').css({ left: (pos.left)+'px', top: (pos.top) + 'px'}).bind("mousedown", function(e) {
-						okLeft = true;
-						if (e.preventDefault)
-							e.preventDefault();
-						
-						$("#canvas").trigger("mousemove");
-						return false;
-					});
-					
-				$(document.body).append(startBRight).append(startBLeft);
-				
-				
-				$("#canvas").bind("mousemove", function(e) {
-					draw(c2d, okLeft, okRight, e.clientX - pos.left, e.clientY -  pos.top);
-				});
-				$(document.body).bind("mouseup", function(e) {
-					okLeft = false;
-					okRight = false;
-				});
-				
-				draw(c2d);
-				
-				//setInterval(function() { draw(c2d) }, 1000 / 20);
-			})});
-			
-			
-			function draw(c2d, okLeft, okRight, mouseX, mouseY) {
-				
-				var tPerc = image.height + (0.3 * image.height);
-				c2d.clearRect(0, 0, image.width * 2,  image.height * 2);
-				/*c2d.beginPath();
-					c2d.moveTo(0,0);
-					c2d.lineTo(0, tPerc);
-					c2d.lineTo(image.width, tPerc);
-					c2d.lineTo(image.width, 0);
-					c2d.lineTo(0, 0);
-				c2d.closePath();
-				c2d.clip();*/
-				c2d.drawImage(image, 0, 0);
-				c2d.drawImage(image, image.width, 0);
+			$(document).ready(function() {	 
+                            var dim = {
+                                width: 319,
+                                height: 409
+                            }
+                            // Set canvas to double size of image
+                            canvas = $("#canvas").width(dim.width * 2).height(dim.height * 2).get(0);
+                            //c2d = canvas.getContext('2d');
 
-				c2d.save();	
-				if (mouseX && mouseY && okRight)
-					drawClipRight(c2d, mouseX, mouseY);
-				else if (mouseX && mouseY && okLeft)
-					drawClipLeft(c2d, mouseX, mouseY);
-				c2d.restore();
-			}
-			
-			function drawClipLeft(c2d, mouseX, mouseY) {
-				var pos = $(canvas).offset();
-				
-				var x = (mouseX == 0 ? 1 : Math.abs(mouseX)), y = mouseY;
+                            // set canvas to the middle of the screen
+                            $(canvas).css( { 'position': 'absolute', 'top': ($(document).height() / 2 - $(canvas).height() / 2 + $("div.panel").height()) + 'px', 'left': ($(document).width() / 2 - $(canvas).width() / 2) + 'px' } );
 
-				
-				//var angle = ((y)/x * -90);
-				
-				// distance = root((x2 - x1)^2 + (y2 - y1)^2) / 2, since I want the middle of the thing.
-                                var distanciaMeio = Math.sqrt(x*x + y*y) / 2;
-                                var myBeta = Math.acos(x / 2 / distanciaMeio);
-                                var myTheta = 90 - myBeta;
-                                var myHeight = y / 2 / Math.sin(myTheta * Math.PI/180);
 
-                                // Y = root(2dis^2)
-                                var myY = Math.sqrt(myHeight * myHeight + distanciaMeio * distanciaMeio);
-				var easy = y / myY;
-                                var plus90 = false;
-                                if (easy > 1) {
-                                    easy = 1 - (easy - 1);
-                                    plus90 = true;
+                            if (FP) {
+                                var imgs = [
+                                    new Image(),
+                                    new Image(),
+                                    new Image(),
+                                    new Image(),
+                                    new Image(),
+                                    new Image()
+                                ];
+                                imgs[0].src = "/public/magazine.jpg";
+                                imgs[1].src = "/public/capa1.jpg";
+                                imgs[2].src = "/public/capa2.jpg";
+                                imgs[3].src = "/public/capa3.jpg";
+                                imgs[4].src = "/public/capa4.jpg";
+                                imgs[5].src = "/public/capa5.jpg";
+
+                                FP.init(imgs, dim, canvas);
+
+                                function updateCurrent() {
+                                    var s = FP.getCurrent() + 1;
+                                    if (s > imgs.length)
+                                        s = imgs.length;
+                                    $("input.current").val(s);
                                 }
-                                else if (easy == 1) {
-                                	var angle = -90;
-                                }
-								var angle = (easy == 1 ? -90 : -Math.asin(easy) * 180 / Math.PI);
-								if (plus90) {
-									angle = 90 + (90 - angle);
-								}
-				
-				var clipWidth = y / Math.sin((-1*angle) * Math.PI/180);
-				var clipHeight = x / Math.cos((90 + angle) * Math.PI/180);
-				var pageWidth = x/ Math.cos((-1*angle) * Math.PI/180);
-				
-				
-				var inteiro = pageWidth / Math.sin((-1*angle) * Math.PI/180);
-				var ponto = clipHeight * Math.sin((90 + angle) * Math.PI/180);
-				
-				
-				var sigma = clipHeight * Math.sin((90 + angle) * Math.PI/180);				
-				var beta = Math.tan((90 + angle) * Math.PI/180) * y;
-				
-				$("#log").html("x: " + x + " y: " + y + " angle: " + angle + " clipWith: " + (clipWidth) + " clipHeight: " + clipHeight);
-				
-				var preimg =  (image.width - clipWidth);
-				var preimgH =  (image.height - clipHeight);
-				//var howLong = x / Math.sin((90 - (angle*-1)) * Math.PI/180);
-				/*	
-				if (Math.abs(angle) > 130) {
-					angle = -130;
-				}*/
-				c2d.save();			
-					c2d.save();
-						c2d.translate(mouseX, mouseY);
-						c2d.rotate(-angle * Math.PI / 180);
-						c2d.translate(-image.width, 0);
 
-						c2d.beginPath();
-							c2d.moveTo(preimg, 0);
-							c2d.lineTo(image.width, 0);
-							c2d.lineTo(image.width, clipHeight);
-							c2d.lineTo(preimg ,0);
-						c2d.closePath();
-						c2d.clip();
-						c2d.drawImage(image, 0, 0);
-						//c2d.scale(-1, 1);
-					c2d.restore();
-				c2d.restore();
-					
-					//c2d.stroke();
-				
-				c2d.save();
-					
-					c2d.beginPath();
-						c2d.moveTo(mouseX - beta, 0);
-						c2d.lineTo(0 , 0);
-						c2d.lineTo(0, y + sigma);
-						c2d.lineTo(mouseX - beta,0);
-					c2d.closePath();
-					c2d.fill();
-				c2d.restore();
-			}
-			
-			function drawClipRight(c2d, mouseX, mouseY) {
-				var x = (mouseX == 0 ? 1 : Math.abs(mouseX - image.width * 2)), y = mouseY;
-
-                                // distance = root((x2 - x1)^2 + (y2 - y1)^2) / 2, since I want the middle of the thing.
-                                var distanciaMeio = Math.sqrt(x*x + y*y) / 2;
-                                var myBeta = Math.acos(x / 2 / distanciaMeio);
-                                var myTheta = 90 - myBeta;
-                                var myHeight = y / 2 / Math.sin(myTheta * Math.PI/180);
-
-                                // Y = root(2dis^2)
-                                var myY = Math.sqrt(myHeight * myHeight + distanciaMeio * distanciaMeio);
-				// Now the angle is easy =´p
-                                // first I see if it is ok..
-                                var easy = y / myY;
-                                var plus90 = false;
-                                if (easy > 1) {
-                                    easy = 1 - (easy - 1);
-                                    plus90 = true;
-                                }
-                                else if (easy == 1) {
-                                	var angle = -90;
-                                }
-								var angle = (easy == 1 ? -90 : -Math.asin(easy) * 180 / Math.PI);
-								if (plus90) {
-									angle = 90 + (90 - angle);
-								}
-                                
-				
-				var clipWidth = y / Math.sin((-1*angle) * Math.PI/180);
-				var clipHeight = x / Math.cos((90 + angle) * Math.PI/180);
-				var pageWidth = x/ Math.cos((-1*angle) * Math.PI/180);
-				
-				
-				var inteiro = pageWidth / Math.sin((-1*angle) * Math.PI/180);
-				var ponto = clipHeight * Math.sin((90 + angle) * Math.PI/180);
-				
-				
-				var sigma = clipHeight * Math.sin((90 + angle) * Math.PI/180);				
-				var beta = Math.tan((90 + angle) * Math.PI/180) * y;
-				
-				$("#log").html("asin: " + easy +  "x: " + x + " y: " + y + " angle: " + angle + " clipWith: " + (clipWidth) + " clipHeight: " + clipHeight);
-				
-				
-				//var howLong = x / Math.sin((90 - (angle*-1)) * Math.PI/180);
-				c2d.save();			
-					c2d.save();
-						c2d.translate(mouseX,mouseY);
-						c2d.rotate(angle * Math.PI / 180);
-						c2d.beginPath();
-							c2d.moveTo(0, 0);
-							c2d.lineTo(0, clipHeight);
-							c2d.lineTo(clipWidth, 0);
-							c2d.lineTo(0 ,0);
-						c2d.closePath();
-						c2d.clip();
-						c2d.drawImage(image, 0, 0);
-						//c2d.scale(-1, 1);
-					c2d.restore();
-				c2d.restore();
-					
-					//c2d.stroke();
-					
-				c2d.save();
-					c2d.beginPath();
-						c2d.moveTo(0,0);
-						c2d.lineTo(0, image.height);
-						c2d.lineTo(image.width * 2, image.height);
-						c2d.lineTo(image.width * 2, 0);
-						c2d.closePath();
-						c2d.clip();
-					c2d.beginPath();
-						c2d.moveTo(mouseX + beta, 0);
-						c2d.lineTo(image.width * 2,0);
-						c2d.lineTo(image.width * 2, y + sigma);
-						c2d.lineTo(mouseX + beta,0);
-					c2d.closePath();
-					c2d.fill();
-				c2d.restore();
-			}
+                                $('button.back').click(function() {
+                                   if (FP.getCurrent() > 0) {
+                                       FP.setCurrent(FP.getCurrent() - 2);
+                                       updateCurrent();
+                                   }
+                                });
+                                $('button.fwrd').click(function() {
+                                   if (FP.getCurrent() < imgs.length) {
+                                       FP.setCurrent(FP.getCurrent() + 2);
+                                       updateCurrent();
+                                   }
+                                });
+                                $("input.current").val("1").bind("keypress",  function(e) {
+                                    if (e.keyCode == 13) {
+                                        var v = $(this).val();
+                                        FP.setCurrent(v - 1);
+                                        var c = FP.getCurrent();
+                                        if (c + 1 != v && c != v || v == 0 || v > imgs.length)
+                                            updateCurrent();
+                                    }
+                                });
+                                $("span.maxN").html("\\ " + imgs.length);
+                                FP.listenPageFlip(function() {
+                                    updateCurrent();
+                                });
+                            } else {
+                                alert("Erro =/");
+                            }
+			});
 		</script>
 	</body>
 </html>
