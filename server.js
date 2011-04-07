@@ -14,7 +14,11 @@ app.get('/', function(req, res){
 });
 
 
-app.get('/public/(*.(js|css|png|jpg))', function(req, res){
+app.get('/public/(*.(js|css|png|jpg|html))', function(req, res){
+		res.sendfile(__dirname + '/public/' + req.params[0] + '.' + req.params[1]);
+});
+
+app.get('/public/ebook/(*.(png))', function(req, res){
 		res.sendfile(__dirname + '/public/' + req.params[0] + '.' + req.params[1]);
 });
 

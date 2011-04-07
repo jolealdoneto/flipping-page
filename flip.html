@@ -1,20 +1,20 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html>
 	<head>
-		<title>Flipping-page, José Leal Domingues Neto</title>
-		<script type="text/javascript" src="/public/jquery.js"></script>
-                <script type="text/javascript" src="/public/flipPage.js"></script>
-		<link href="/public/style.css" rel="Stylesheet" />
+		<title>Franz Kafka - Metamorphosis</title>
+		<script type="text/javascript" src="public/jquery.js"></script>
+                <script type="text/javascript" src="public/flipPage.js"></script>
+		<link href="public/style.css" rel="Stylesheet" />
 	</head>
 	<body>
-		<canvas id="canvas" width="638px" height="818px">
+		<canvas id="canvas" width="1158px" height="1120px">
 			<p>Your browser does not support the canvas element.</p>
 		</canvas>
                 <div class="panel">
                     <button class="back"></button>
-                    <button class="fwrd"></button>
                     <input type="text" class="current" />
                     <span class="maxN"></span>
+                    <button class="fwrd"></button>
                 </div>
 		
 		<script type="text/javascript">
@@ -23,34 +23,52 @@
 			
 			$(document).ready(function() {	 
                             var dim = {
-                                width: 319,
-                                height: 409
+                                width: 579,
+                                height: 740
                             }
-                            // Set canvas to double size of image
-                            canvas = $("#canvas").width(dim.width * 2).height(dim.height * 2).get(0);
+
+                            canvas = $("#canvas");
+//                            var rate = canvas.width() / canvas.height();
+//                            var h = $(window).height() - 40;  
+//                            canvas.height(h);
+//                            canvas.width(h * rate);
+                            canvas = canvas.get(0);
+
                             //c2d = canvas.getContext('2d');
 
+                            // Now I have to create a div that imitates the canvas.. box the shadow..
+                            $(document.body).append(
+                                $('<div class="imitate">').css( { 'height': dim.height, 'width': dim.width*2, 'position': 'absolute', 'top': ($(window).height() / 2 - dim.height / 2) + 'px', 'left': ($(window).width() / 2 - $(canvas).width() / 2) + 'px' } )
+                            );
+
                             // set canvas to the middle of the screen
-                            $(canvas).css( { 'position': 'absolute', 'top': ($(document).height() / 2 - $(canvas).height() / 2 + $("div.panel").height()) + 'px', 'left': ($(document).width() / 2 - $(canvas).width() / 2) + 'px' } );
+                            $(canvas).css( { 'position': 'absolute', 'top': ($(window).height() / 2 - dim.height / 2) + 'px', 'left': ($(window).width() / 2 - $(canvas).width() / 2) + 'px' } );
 
 
                             if (FP) {
-                                var imgs = [
-                                    new Image(),
-                                    new Image(),
-                                    new Image(),
-                                    new Image(),
-                                    new Image(),
-                                    new Image()
-                                ];
-                                imgs[0].src = "/public/magazine.jpg";
-                                imgs[1].src = "/public/capa1.jpg";
-                                imgs[2].src = "/public/capa2.jpg";
-                                imgs[3].src = "/public/capa3.jpg";
-                                imgs[4].src = "/public/capa4.jpg";
-                                imgs[5].src = "/public/capa5.jpg";
+                                // get formatted numbers..
+                                function fnl(num, length) {
+                                    var r = "" + num;
+                                    while (r.length < length) {
+                                        r = "0" + r;
+                                    }
+                                    return r;
+                                }
+                                
 
-                                FP.init(imgs, dim, canvas);
+
+                                var imgs = [];
+
+                                for (var i = 0; i < 113; i++) {
+                                    var img = new Image();
+                                    img.src = 'public/ebook/plaintext' + fnl(i, 4) + '.png';
+
+                                    imgs.push(img);
+                                }
+
+                                var pages = [];
+
+                                FP.init(imgs, pages, dim, canvas);
 
                                 function updateCurrent() {
                                     var s = FP.getCurrent() + 1;

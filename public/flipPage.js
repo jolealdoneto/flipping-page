@@ -4,12 +4,14 @@
 
 var FP = (function() {
     var images = null;
+    var pages = null;
     var imgReady = [];
     var dim = null;
     var c2d = null;
     var canvas = null;
 
     var current = 0;
+    var change = true;
 
     // Variables to keep track of the click on the corners of the images.
     var okLeft = false;
@@ -17,12 +19,16 @@ var FP = (function() {
 
     var listen = [];
 
+    var page1 = null, page2 = null;
+
     function flipped() {
         var i;
         for (i = 0; i < listen.length; i++) {
             if (listen[i] != null)
                 listen[i]();
         }
+
+        change = true;
     }
 
     function drawClipRight(c2d, mouseX, mouseY) {
@@ -202,14 +208,58 @@ var FP = (function() {
         c2d.restore();
 }
 
+    function setPage(src) {
+        var pg = $('<div class="page">').append($('<iframe>').attr('src', src));
+
+        return pg;
+    }
+
     function draw(c2d, okLeft, okRight, mouseX, mouseY) {
         var tPerc = dim.height + (0.3 * dim.height);
         c2d.clearRect(0, 0, dim.width * 2,  dim.height * 2);
 
-        if (images[current-1] != null)
+        var pos = $(canvas).offset();
+
+        if (pages[current-1] != null) {
+            if (change) {
+                if (page1 == null) {
+                    page1 = setPage(pages[current-1]);
+                    page1.css({ top: pos.top, left: pos.left });
+
+                    $(document.body).append(page1);
+                }
+                else {
+                    page1.find('iframe').attr('src', pages[current-1]);
+                }
+            }
+        }
+        else if (images[current-1] != null)
             c2d.drawImage(images[current-1], 0, 0);
-        if (images[current] != null)
+
+        if (pages[current] != null) {
+            if (change) {
+                if (page2 == null) {
+                    page2 = setPage(pages[current]);
+                    page2.css({ top: pos.top, left: pos.left + dim.width });
+
+                    $(document.body).append(page2);
+                }
+                else {
+                    page2.find('iframe').attr('src', pages[current]);
+                }
+            }
+        }
+        else if (images[current] != null)
             c2d.drawImage(images[current], dim.width, 0);
+
+        c2d.beginPath();
+            c2d.moveTo(0,0);
+            c2d.lineTo(0, dim.height);
+            c2d.lineTo(dim.width*2, dim.height);
+            c2d.lineTo(dim.width*2, 0);
+        c2d.closePath();
+        c2d.stroke();
+
 
         c2d.save();
         if (mouseX && mouseY && okRight)
@@ -217,13 +267,16 @@ var FP = (function() {
         else if (mouseX && mouseY && okLeft)
                 drawClipLeft(c2d, mouseX, mouseY);
         c2d.restore();
+
+
+        change = false;
     }
 
     function start() {
         // Get position
         var pos = $(canvas).position();
         // Set button
-        var startBRight = $('<button class="start">').css({ 'left': (pos.left + dim.width * 2- 30)+'px', 'top': (pos.top) + 'px' }).bind("mousedown", function(e) {
+        var startBRight = $('<button class="start">').css({ 'left': (pos.left + dim.width*2- 30)+'px', 'top': (pos.top) + 'px' }).bind("mousedown", function(e) {
                 okRight = true;
                 if (e.preventDefault)
                         e.preventDefault();
@@ -285,8 +338,9 @@ var FP = (function() {
         start();
     }
 
-    function init(imgs, sz, mcanvas)  {
+    function init(imgs, pgs, sz, mcanvas)  {
         images = imgs;
+        pages = pgs;
         dim = sz;
         canvas = mcanvas;
         c2d = canvas.getContext('2d');
@@ -306,14 +360,56 @@ var FP = (function() {
         }
     }
 
+    function transition(dir, callback) {
+        // calculate polynomial that performs the transition
+        // I basically use the Langrange interpolation method
+        // p(u) = y/2 * (u^2 - ux)/(-x^2/4)
+        function p(u) {
+            return dim.height / 6 * (u*u - u * (dim.width*2)) / (-(dim.width*2*dim.width*2)/4);
+        }
+        function step(i, cond, func, next) {
+            if (cond(i)) {
+                draw(c2d);
+                func(c2d, i, p(i));
+                window.setTimeout(function() {
+                    step(i+next, cond, func, next);
+                }, 1);
+            }
+            else {
+                callback();
+            }
+        }
+
+        if (dir == '<') {
+            step(0, function(i) { return i < (dim.width*2); }, drawClipLeft, 20);
+        }
+        else if (dir == '>') {
+            step(dim.height*2, function(i) { return i > 0; }, drawClipRight, -20);
+        }
+        else
+            callback();
+    }
+
     function setCurrent(nC) {
         if (nC >= 0 && nC < images.length+1) {
-            if (nC % 2 == 1)
-                current = nC + 1;
+            var dir;
+            if (nC == current+1 || nC == current+2)
+                dir = '>';
+            else if (nC == current-2 || nC == current-3 || nC == current-1)
+                dir = '<';
             else
-                current = nC;
+                dir = 'none';
 
-            draw(c2d);
+            transition(dir, function() {
+                if (nC % 2 == 1)
+                    current = nC + 1;
+                else
+                    current = nC;
+
+                change = true;
+                draw(c2d);
+                flipped();
+            });
         }
     }
     function getCurrent() {
